@@ -22,8 +22,6 @@ module State
     (_==_ : ID → ID → Bool)
     where
 
-open Data.List.Fresh using ([]) public
-
 _<<_ = λ {a} {b} {c} → <<ID a b c
 
 cmp : (a : ID × 𝕍) → (b : ID × 𝕍) → Relation.Nullary.Dec (a .proj₁ < b .proj₁)
