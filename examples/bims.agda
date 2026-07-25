@@ -56,12 +56,12 @@ module Aexp₁-small-step-semantic where
     open import Data.Integer using () renaming (ℤ to Num)
 
     Aexp₁ssSemantic : TransitionSystem
-    Aexp₁ssSemantic = ⌞ Aexp₁ss ⊎ Num , _⇒₂_ , T₁ ⌟
+    Aexp₁ssSemantic = ⌞ Aexp₁ss , _⇒₂_ , T₁ ⌟
         where
-            Γ₁ = Aexp₁ss ⊎ Num
+            Γ₁ = Aexp₁ss
             T₁ : Γ₁ → Set
-            T₁ (inj₂ x) = ⊤
-            T₁ (inj₁ x) = ⊥
+            T₁ (N x) = ⊤
+            T₁ x = ⊥
 
 -- Section End Page 36-37
 
@@ -70,52 +70,50 @@ module Aexp₁-small-step-semantic where
 module Bexp-small-step-example where
     open import Relation.Binary.PropositionalEquality using (refl)
     import Bims
-    open Bims.Bexp-smallstep-transition
-    open Bims.Aexp₁-smallstep-semantic using (Aexp₁ss; Bexp; N_; _*_; _+_; NUMₛₛₛ_; _∧_; _==_)
+    open Bims.Aexp₁-smallstep-semantic using (Aexp₁ss; Bexpₛₛ; _ᵇ; N_; V_; _*_; _+_; NUMₛₛₛ; _∧_; _==_)
     open import Data.Sum using (_⊎_; inj₁; inj₂)
     open import Data.Bool using (Bool) renaming (true to tt; false to ff; _∧_ to _∧b_)
     open import Data.Integer using (+_) renaming (ℤ to Num)
     open import Data.Nat using (ℕ)
 
-    infixl 40 _ₙ==_
-    _ₙ==_ : ℕ → ℕ → Bexp ⊎ Bool
-    x ₙ== y = inj₁ ((inj₂ (+ x)) == (inj₂ (+ y)))
+    infixr 4 _ₙ==_
+    _ₙ==_ : ℕ → ℕ → Bexpₛₛ
+    x ₙ== y = V + x == V + y
 
-    infixl 40 _ₛ==_
-    _ₛ==_ : ℕ → ℕ → Bexp ⊎ Bool
-    x ₛ== y = inj₁ ((inj₁ (N (+ x))) == (inj₁ (N (+ y))))
+    infixr 4 _ₛ==_
+    _ₛ==_ : ℕ → ℕ → Bexpₛₛ
+    x ₛ== y = N + x == N + y
 
-    infixl 39 _ₛ∧_
-    _ₛ∧_ : Bexp ⊎ Bool → Bexp ⊎ Bool → Bexp ⊎ Bool
-    x ₛ∧ y = inj₁ (x ∧ y)
+    ᵥtt : Bexpₛₛ
+    ᵥtt = tt ᵇ
+    ᵥff : Bexpₛₛ
+    ᵥff = ff ᵇ
 
-    ᵥtt : Bexp ⊎ Bool
-    ᵥtt = inj₂ tt
-    ᵥff : Bexp ⊎ Bool
-    ᵥff = inj₂ ff
-
-    code1 = 0 ₙ== 1 ₛ∧ 0 ₙ== 0 ₛ∧ 6 ₛ== 5
-    code2 = ᵥff     ₛ∧ 0 ₙ== 0 ₛ∧ 6 ₛ== 5
-    code3 = ᵥff     ₛ∧ ᵥtt     ₛ∧ 6 ₛ== 5
-    code4 = ᵥff     ₛ∧ ᵥtt     ₛ∧ inj₁ (inj₁ (N + 6) == inj₂ (+ 5))
-    code5 = ᵥff     ₛ∧ ᵥtt     ₛ∧ 6 ₙ== 5
-    code6 = ᵥff     ₛ∧ ᵥtt     ₛ∧ ᵥff
+    code1 : Bexpₛₛ
+    code1 = 0 ₙ== 1 ∧ 0 ₙ== 0 ∧ 6 ₛ== 5
+    code2 = ᵥff     ∧ 0 ₙ== 0 ∧ 6 ₛ== 5
+    code3 = ᵥff     ∧ ᵥtt     ∧ 6 ₛ== 5
+    code4 = ᵥff     ∧ ᵥtt     ∧ ((N + 6) == (V (+ 5)))
+    code5 = ᵥff     ∧ ᵥtt     ∧ 6 ₙ== 5
+    code6 = ᵥff     ∧ ᵥtt     ∧ ᵥff
     code7 = ᵥff
 
-    a : code1 ⇒b code2
-    a = AND-1-BSS (AND-1-BSS (EQUALS-4-BSS λ ()))
-    b : code2 ⇒b code3
-    b = AND-1-BSS (AND-2-BSS (EQUALS-3-BSS refl))
-    c : code3 ⇒b code4
-    c = AND-2-BSS (EQUALS-2-BSS (NUMₛₛₛ refl))
-    d : code4 ⇒b code5
-    d = AND-2-BSS (EQUALS-1-BSS (NUMₛₛₛ refl))
-    e : code5 ⇒b code6
-    e = AND-2-BSS (EQUALS-4-BSS (λ ()))
-    g : code6 ⇒b code7
-    g = AND-5-BSS refl
 
--- Section End Page 40
+    open Bims.Bexp-smallstep-transition
+    a : code1 ⇒b code2
+    a = AND-1-SSS (EQUALS-4-SSS λ ())
+    b : code2 ⇒b code3
+    b = AND-2-SSS (AND-1-SSS EQUALS-3-SSS)
+    c : code3 ⇒b code4
+    c = AND-2-SSS (AND-2-SSS (EQUALS-2-SSS NUMₛₛₛ))
+    d : code4 ⇒b code5
+    d = AND-2-SSS (AND-2-SSS (EQUALS-1-SSS NUMₛₛₛ))
+    e : code5 ⇒b code6
+    e = AND-2-SSS (AND-2-SSS (EQUALS-4-SSS λ ()))
+    g : code6 ⇒b code7
+    g = AND-4-SSS
+
+-- Section End Page 4
 
 -- Section Begin Page 48-52
 module Aexp₂-state-transition-example where
@@ -125,10 +123,11 @@ module Aexp₂-state-transition-example where
     open Bims.Stm₂-semantic hiding (<<str)
     open import Data.Nat using (ℕ)
     open import Data.Sum using (_⊎_; inj₁; inj₂)
+    open import Data.List.Fresh using ([])
 
     open import Data.Integer using (ℤ; +_)
     open import Data.String using (String; _<_; _<?_; _==_)
-    open import State ℤ String _<_ <<str _<?_ _==_
+    open import States ℤ String _<_ <<str _<?_ _==_
 
     code = ("i" ←₃ (inj₁ (N + 6))) Å₃
         (while ¬₃ (inj₁ (V "i") ==₃ inj₁ (N + 0)) do₃ (
@@ -166,7 +165,7 @@ module Aexp₂-state-transition-example where
     neverTerminates : ∀ s → ∃ λ s´ → not ⟨ S , s ⟩⇒₂ s´
     neverTerminates s = [] , f
         where
-            f : {s : State} → ⟨ S , s ⟩⇒₂ [] → ⊥
+            f : {s : States} → ⟨ S , s ⟩⇒₂ [] → ⊥
             f (WHILE-TRUE-BSS _ _ x₂) = f x₂
             f (WHILE-FALSE-BSS (EQUALS-2-BSS NUM-BSS NUM-BSS x₃)) = x₃ refl
 
@@ -191,7 +190,8 @@ module Aexp₂-smallstep-example where
 
     open import Data.Integer using (ℤ; +_)
     open import Data.String using (String; _<_; _<?_; _==_)
-    open import State ℤ String _<_ <<str _<?_ _==_
+    open import States ℤ String _<_ <<str _<?_ _==_
+    open import Data.List.Fresh using ([])
 
     S =
         ifStm₂
@@ -211,7 +211,7 @@ module Aexp₂-smallstep-example where
     open import Data.Bool using (true)
 
     -- Problem 4.9
-    -- There's only one transition from the starte state
+    -- There's only one transition from the start state
     transition1 :
         inj₁ (S , s )
         ⇒⟨ 1 ⟩
@@ -257,7 +257,6 @@ module SmallStep-BigStep-Equivalence where
     import Bims
     open Bims.Aexp₂-semantic
     open Bims.Stm₂-semantic hiding (<<str)
-    open Bims.Aexp₁-bigstep-semantic
     open import Data.Nat using (ℕ; suc; zero) renaming (_+_ to _+ℕ_)
     open import Data.Integer using (+_)
     open import Data.String using (String)
@@ -265,20 +264,20 @@ module SmallStep-BigStep-Equivalence where
     open import Data.Sum using (inj₁; inj₂)
     open import Data.Bool using (false; true)
     open import TransitionSystems using () renaming (TransitionSystem to T)
-    open T ⟨_⟩⇒₂⟨_⟩-transition using (_⇒∘⇒_; x⇒x; _⇒*_; _⇒⟨_⟩_; _⇒∘_; _⇒_; _∘⇒∘_; x⇒*x)
+    open T ⟨_⟩⇒₂⟨_⟩-transition using (_⇒∘⇒_; x⇒x; _⇒⟨_⟩_; _⇒*_; _⇒∘_; _⇒_; _∘⇒∘_; x⇒*x)
 
     open import Data.Integer using (ℤ; +_)
     open import Data.String using (String; _<?_) renaming (_==_ to _==s_; _<_ to _<s_)
-    open import State ℤ String _<s_ <<str _<?_ _==s_
+    open import States ℤ String _<s_ <<str _<?_ _==s_
 
-    L4-12 : {S₁ S₂ : Stm₂} {s s´ : State}
+    L4-12 : {S₁ S₂ : Stm₂} {s s´ : States}
           → inj₁(S₁ , s) ⇒* inj₂ s´
           → inj₁(S₁ Å₃ S₂ , s) ⇒* inj₁(S₂ , s´)
     L4-12 (suc fst , fst₁ ⇒∘⇒ x⇒x) = COMP-2ₛₛₛ fst₁ ⇒∘ x⇒*x
     L4-12 (suc k , (_⇒∘⇒_ {γ˝ = inj₁ S₁´,s˝} premise⟨S₁,s⟩⇒⟨S₁´,s˝⟩ ⟨S₁´,s˝⟩⇒ᵏy)) = COMP-1ₛₛₛ premise⟨S₁,s⟩⇒⟨S₁´,s˝⟩ ⇒∘ L4-12 (k , ⟨S₁´,s˝⟩⇒ᵏy)
 
     -- Theorem 4.11 -- Apparently this should be hard to prove, and needs the lemma, though agda figures it out without the lemma
-    T4-11 : {S : Stm₂} → {s s´ : State} → ⟨ S , s ⟩⇒₂ s´ → inj₁(S , s) ⇒* inj₂ s´
+    T4-11 : {S : Stm₂} → {s s´ : States} → ⟨ S , s ⟩⇒₂ s´ → inj₁(S , s) ⇒* inj₂ s´
     T4-11 (ASS-BSS x) = ASSₛₛₛ x ⇒∘ x⇒*x
     T4-11 SKIP-BSS = SKIPₛₛₛ ⇒∘ x⇒*x
     T4-11 (COMP-BSS ⟨S₁,s⟩⇒s´ ⟨S₂,s´⟩⇒s˝) = L4-12 (T4-11 ⟨S₁,s⟩⇒s´) ∘⇒∘ T4-11 ⟨S₂,s´⟩⇒s˝
@@ -287,7 +286,7 @@ module SmallStep-BigStep-Equivalence where
     T4-11 (WHILE-TRUE-BSS s⊢b⇒ᵇtt ⟨S,s⟩⇒s˝ ⟨while-b-do-S,s˝⟩⇒s´) = WHILEₛₛₛ ⇒∘ IF-TRUEₛₛₛ s⊢b⇒ᵇtt ⇒∘ L4-12 (T4-11 ⟨S,s⟩⇒s˝) ∘⇒∘ T4-11 ⟨while-b-do-S,s˝⟩⇒s´
     T4-11 (WHILE-FALSE-BSS s⊢b⇒ᵇff) = WHILEₛₛₛ ⇒∘ IF-FALSEₛₛₛ s⊢b⇒ᵇff ⇒∘ SKIPₛₛₛ ⇒∘ x⇒*x
 
-    L4-14 : {S₁ S₂ : Stm₂} {s s˝ : State} {k : ℕ}
+    L4-14 : {S₁ S₂ : Stm₂} {s s˝ : States} {k : ℕ}
           → inj₁(S₁ Å₃ S₂ , s) ⇒⟨ k ⟩ inj₂ s˝
           → ∃ λ s´ →
             Σ (inj₁(S₁ , s ) ⇒* inj₂ s´) λ lSeq →
@@ -297,7 +296,7 @@ module SmallStep-BigStep-Equivalence where
     L4-14 (COMP-1ₛₛₛ x ⇒∘⇒ x₁) | s´ , xx , y , refl = s´ , x ⇒∘ xx , y , refl
     L4-14 {k = suc (suc k)} (COMP-2ₛₛₛ x ⇒∘⇒ x₁) = _ , x ⇒∘ x⇒*x , (_ , x₁) , refl
 
-    step-then-big : {S S´ : Stm₂} {s s´ s˝ : State}
+    step-then-big : {S S´ : Stm₂} {s s´ s˝ : States}
                   → inj₁(S , s) ⇒ inj₁(S´ , s´)
                   → ⟨ S´ , s´ ⟩⇒₂ s˝
                   → ⟨ S , s ⟩⇒₂ s˝
@@ -310,7 +309,7 @@ module SmallStep-BigStep-Equivalence where
     step-then-big WHILEₛₛₛ (IF-FALSE-BSS SKIP-BSS x) = WHILE-FALSE-BSS x
 
     -- Theorem 4.13
-    T4-13 : {S : Stm₂} {s s´ : State} {k : ℕ}
+    T4-13 : {S : Stm₂} {s s´ : States} {k : ℕ}
           → inj₁(S , s) ⇒⟨ k ⟩ inj₂ s´
           → ⟨ S , s ⟩⇒₂ s´
     T4-13 (ASSₛₛₛ x ⇒∘⇒ x⇒x) = ASS-BSS x

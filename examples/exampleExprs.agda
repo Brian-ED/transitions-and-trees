@@ -13,22 +13,22 @@ import examples.bims
 open Bims.Aexp₁-smallstep-semantic hiding (_⇒⟨_⟩_; _⇒*_; _⇒∘⇒_; x⇒x)
 open T (examples.bims.Aexp₁-small-step-semantic.Aexp₁ssSemantic)
 
-exampleAexp₂1 : inj₁ (inj₁ ((inj₁ (N (+ 3))) + (inj₁ (N (+ 12)))) * inj₁ (inj₁ (N + 4) * inj₁ ((inj₁ (N + 5)) * (inj₁ (N + 9)))))
-         ⇒⟨ 3 ⟩ inj₁ (inj₂ (+ 15)                                 * inj₁ (inj₁ (N + 4) * (inj₁ ((inj₁ (N + 5)) * (inj₁ (N + 9))))))
-exampleAexp₂1 = (MULT-1ₛₛₛ PLUS-1ₛₛₛ NUMₛₛₛ refl)
-            ⇒∘⇒ (MULT-1ₛₛₛ PLUS-2ₛₛₛ NUMₛₛₛ refl)
+exampleAexp₂1 : ((N + 3 + N + 12) * (N + 4 * (N + 5 * N + 9)))
+         ⇒⟨ 3 ⟩ (V + 15 * (N + 4 * (N + 5 * N + 9)))
+exampleAexp₂1 = (MULT-1ₛₛₛ PLUS-1ₛₛₛ NUMₛₛₛ)
+            ⇒∘⇒ (MULT-1ₛₛₛ PLUS-2ₛₛₛ NUMₛₛₛ)
             ⇒∘⇒ (MULT-1ₛₛₛ PLUS-3ₛₛₛ)
             ⇒∘⇒ x⇒x
 
 -- Problem 3.12
-exampleAexp₂2 : inj₁ (inj₁(inj₁(N + 2) + inj₁(N + 3))* inj₁(inj₁(N + 4) + inj₁(N + 9))) ⇒* inj₂ (+ 65)
-exampleAexp₂2 = 7 , (MULT-1ₛₛₛ PLUS-1ₛₛₛ NUMₛₛₛ refl)
-                ⇒∘⇒ (MULT-1ₛₛₛ PLUS-2ₛₛₛ NUMₛₛₛ refl)
+exampleAexp₂2 : ((N + 2 + N + 3) * (N + 4 + N + 9)) ⇒* V + 65
+exampleAexp₂2 = 7 , (MULT-1ₛₛₛ PLUS-1ₛₛₛ NUMₛₛₛ)
+                ⇒∘⇒ (MULT-1ₛₛₛ PLUS-2ₛₛₛ NUMₛₛₛ)
                 ⇒∘⇒ (MULT-1ₛₛₛ PLUS-3ₛₛₛ)
-                ⇒∘⇒ (MULT-2ₛₛₛ PLUS-1ₛₛₛ NUMₛₛₛ refl)
-                ⇒∘⇒ (MULT-2ₛₛₛ PLUS-2ₛₛₛ NUMₛₛₛ refl)
+                ⇒∘⇒ (MULT-2ₛₛₛ PLUS-1ₛₛₛ NUMₛₛₛ)
+                ⇒∘⇒ (MULT-2ₛₛₛ PLUS-2ₛₛₛ NUMₛₛₛ)
                 ⇒∘⇒ (MULT-2ₛₛₛ PLUS-3ₛₛₛ)
-                ⇒∘⇒ (MULT-3ₛₛₛ refl)
+                ⇒∘⇒ (MULT-3ₛₛₛ)
                 ⇒∘⇒ x⇒x
 
 -- Section End Page 38

@@ -12,7 +12,7 @@ open import Function using (_∘_)
 
 import Level
 
-module State
+module States
     {ℓ₁} {ℓ₂}
     (𝕍 : Set ℓ₁)
     (ID : Set ℓ₂)
@@ -27,7 +27,7 @@ _<<_ = λ {a} {b} {c} → <<ID a b c
 cmp : (a : ID × 𝕍) → (b : ID × 𝕍) → Relation.Nullary.Dec (a .proj₁ < b .proj₁)
 cmp (a , b) (x , y) = a <? x
 
-State = List# {r = ℓ₂} {a = ℓ₁ Level.⊔ ℓ₂} (ID × 𝕍) ⌊ cmp ⌋
+States = List# {r = ℓ₂} {a = ℓ₁ Level.⊔ ℓ₂} (ID × 𝕍) ⌊ cmp ⌋
 myFresh = fresh (ID × 𝕍) ⌊ cmp ⌋
 
 toDec : ∀ {s₁ s} → s₁ < s → ⌊ s₁ <? s ⌋
@@ -43,7 +43,7 @@ appendFresh : ∀ {s n id val xs₁} x → s < id → myFresh (s , n) (cons (id 
 appendFresh {xs₁ = []} _ ordered = toDec ordered , _
 appendFresh {xs₁ = cons (id₁ , val₁) xs₁ lower} (lower₁ , snd₁) ordered = toDec ordered , appendFresh lower (ordered << fromDec lower₁)
 
-_[_↦_] : (s : State) → (id : ID) → (v : 𝕍) → State
+_[_↦_] : (s : States) → (id : ID) → (v : 𝕍) → States
 [] [ id ↦ v ] = (id , v) ∷# []
 cons (id₁ , v₁) _ p₁ [ id ↦ v ] with id <? id₁ | id₁ <? id
 cons s₁ [] p₁ [ id ↦ v ] | yes p | q = cons (id , v) (s₁ ∷# []) (toDec p , _)
@@ -58,19 +58,19 @@ cons (id₁ , v₁) (cons (id₂ , v₂) s p₂) p₁ [ id ↦ v ] | no p | yes 
 ... | yes pp = cons (id₁ , v₁) (cons (idᵣ₁ , vᵣ₁) r pᵣ₁) (appendFresh pᵣ₁ pp)
 ... | no  pp = [] -- See comment 2 lines above
 
-lookup : State → ID → Maybe 𝕍
+lookup : States → ID → Maybe 𝕍
 lookup xs id = map proj₂ (findᵇ (id ==_ ∘ proj₁) (toList xs .proj₁))
 
-joinOverwrite : (overWrited overWriter : State) → State
+joinOverwrite : (overWrited overWriter : States) → States
 joinOverwrite overWrited overWriter = foldr (λ x y → uncurry (y [_↦_]) x) overWrited (toList overWriter .proj₁)
 
-_⊢_==ₛ_ : (_==ᵥ_ : 𝕍 → 𝕍 → Bool) → State → State → Bool
+_⊢_==ₛ_ : (_==ᵥ_ : 𝕍 → 𝕍 → Bool) → States → States → Bool
 _ ⊢ [] ==ₛ [] = true
 _ ⊢ [] ==ₛ _  = false
 _ ⊢ _  ==ₛ [] = false
 _==ᵥ_ ⊢ (aID , aV) ∷# as ==ₛ ((bID , bV) ∷# bs) = (aV ==ᵥ bV) ∧ (aID == bID) ∧ (_==ᵥ_ ⊢ as ==ₛ bs)
 
-delete : (id : ID) → (s : State) → (∃ λ v → lookup s id ≡ just v) → State
+delete : (id : ID) → (s : States) → (∃ λ v → lookup s id ≡ just v) → States
 delete id ((id₁ , v₁) ∷# xs) z with id == id₁
 ... | true = xs
 ... | false = delete id xs z [ id₁ ↦ v₁ ]

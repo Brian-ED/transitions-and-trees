@@ -118,13 +118,13 @@ module Aexp₁-smallstep-semantic where
         ⟨_⟩ : Bexpₛₛ → Bexpₛₛ
         _ᵇ : Bool → Bexpₛₛ
 
-    infixr 6 N_
-    infixr 5 _*_
-    infixr 4 _+_
-    infixr 4 _-_
-    infix 3 _==_
+    infixr 7 N_ V_
+    infixr 6 _*_
+    infixr 5 _+_
+    infixr 5 _-_
+    infix 4 _==_
     infix 3 _<_
-    infix 3 _∧_
+    infixr 3 _∧_
     infix 2 _⇒₂_
 
     infixr 5 PLUS-1ₛₛₛ_
@@ -137,7 +137,7 @@ module Aexp₁-smallstep-semantic where
     infixr 5 SUB-2ₛₛₛ_
     infixr 5 SUB-3ₛₛₛ
     infixr 5 PARENT-1ₛₛₛ_
-    infixr 5 NUMₛₛₛ_
+    infixr 5 NUMₛₛₛ
 
     data _⇒₂_ : Aexp₁ss → Aexp₁ss → Set where
 
@@ -187,7 +187,7 @@ module Aexp₁-smallstep-semantic where
                      → [ V x ] ⇒₂ V y
 
         -- NUM
-        NUMₛₛₛ_ : ∀ {x}
+        NUMₛₛₛ : ∀ {x}
                   → N x ⇒₂ V x
 
     open import TransitionSystems using (TransitionSystem; ⌞_,_,_⌟)
@@ -289,11 +289,11 @@ module Bexp-smallstep-transition where
 
     data _⇒b_ : Bexpₛₛ → Bexpₛₛ → Set where
 
-        EQUALS-1-SSS_ : ∀ {α₁ α₁´ α₂}
+        EQUALS-1-SSS : ∀ {α₁ α₁´ α₂}
                       → α₁ ⇒₂ α₁´
                       → α₁ == α₂ ⇒b α₁´ == α₂
 
-        EQUALS-2-SSS_ : ∀ {α₁ α₂ α₂´}
+        EQUALS-2-SSS : ∀ {α₁ α₂ α₂´}
                       → α₂ ⇒₂ α₂´
                       → α₁ == α₂ ⇒b α₁ == α₂´
 
@@ -304,11 +304,11 @@ module Bexp-smallstep-transition where
                      → not x ≡ y
                      → V x == V y ⇒b ff ᵇ
 
-        GREATERTHAN-1-SSS_ : ∀ {α₁ α₁´ α₂}
+        GREATERTHAN-1-SSS : ∀ {α₁ α₁´ α₂}
                            → α₁ ⇒₂ α₁´
                            → α₁ < α₂ ⇒b α₁´ < α₂
 
-        GREATERTHAN-2-SSS_ : ∀ {α₁ α₂ α₂´}
+        GREATERTHAN-2-SSS : ∀ {α₁ α₂ α₂´}
                            → α₂ ⇒₂ α₂´
                            → α₁ < α₂ ⇒b α₁ < α₂´
 
@@ -320,7 +320,7 @@ module Bexp-smallstep-transition where
                           → not x <ℤ y
                           → V x < V y ⇒b ff ᵇ
 
-        NOT-1-SSS_ : ∀ {α α´}
+        NOT-1-SSS : ∀ {α α´}
                    → α ⇒b α´
                    → ¬ α ⇒b ¬ α´
 
@@ -332,11 +332,11 @@ module Bexp-smallstep-transition where
                       → α ⇒b α´
                       → ⟨ α ⟩ ⇒b ⟨ α´ ⟩
 
-        AND-1-SSS_ : ∀ {α₁ α₁´ α₂}
+        AND-1-SSS : ∀ {α₁ α₁´ α₂}
                    → α₁ ⇒b α₁´
                    → α₁ ∧ α₂ ⇒b α₁´ ∧ α₂
 
-        AND-2-SSS_ : ∀ {α₁ α₂ α₂´}
+        AND-2-SSS : ∀ {α₁ α₂ α₂´}
                    → α₂ ⇒b α₂´
                    → α₁ ∧ α₂ ⇒b α₁ ∧ α₂´
 
@@ -371,7 +371,7 @@ module Aexp₂-semantic where
             open IsStrictPartialOrder using (trans)
             open import Data.String.Properties using (<-isStrictPartialOrder-≈)
 
-    open import State Num String _<_ <<str _<?_ _==_ using (State; _[_↦_]; lookup)
+    open import States Num String _<_ <<str _<?_ _==_ using (States; _[_↦_]; lookup)
 
     -- Section Start Page 44-45
 
@@ -394,7 +394,7 @@ module Aexp₂-semantic where
         [_] : Aexp₂ ⊎ Num → Aexp₂
 
 
-    data _⊢_⇒ₐ_ : State → Aexp₂ ⊎ Num → Aexp₂ ⊎ Num → Set where
+    data _⊢_⇒ₐ_ : States → Aexp₂ ⊎ Num → Aexp₂ ⊎ Num → Set where
         _PLUS-BSS_ : ∀ {s α₁ α₂ v₁ v₂}
                    → s ⊢ α₁ ⇒ₐ inj₂ v₁
                    → s ⊢ α₂ ⇒ₐ inj₂ v₂
@@ -422,13 +422,13 @@ module Aexp₂-semantic where
                  → s ⊢ inj₁ (V x) ⇒ₐ inj₂ v
 
     -- The book states that the `⌞ (Aexp₂ ⊎ Num) , (_⊢_⇒ₐ_ s) , T₃ ⌟` transition system is a big-step-semantic, though does not prove it.
-    -- Here is a proof for any starting state s:
+    -- Here is a proof for any starting States s:
 
     T₃ : Aexp₂ ⊎ Num → Set
     T₃ (inj₂ x) = ⊤
     T₃ (inj₁ x) = ⊥
 
-    Aexp₂Semantic : State → TransitionSystem
+    Aexp₂Semantic : States → TransitionSystem
     Aexp₂Semantic s = ⌞ (Aexp₂ ⊎ Num) , (_⊢_⇒ₐ_ s) , T₃ ⌟
 
     Aexp₂-is-big-step-proof : ∀ s x y → s ⊢ x ⇒ₐ y → T₃ y
@@ -451,7 +451,7 @@ module Aexp₂-semantic where
 
     infix 21 _ᵇ ¬₃_
 
-    data _⊢_⇒₂b_ : State → Bexp₂ → Bexp₂ → Set where
+    data _⊢_⇒₂b_ : States → Bexp₂ → Bexp₂ → Set where
 
         _EQUAL-1-BSS_ : ∀ {s α₁ α₂ v}
                       → s ⊢ α₁ ⇒ₐ inj₂ v
@@ -526,7 +526,7 @@ module Stm₂-semantic where
             open IsStrictPartialOrder using (trans)
             open import Data.String.Properties using (<-isStrictPartialOrder-≈)
 
-    open import State Num String _<_ <<str _<?_ _==_ using (State; _[_↦_])
+    open import States Num String _<_ <<str _<?_ _==_ using (States; _[_↦_])
 
 
     -- Section Begin Page 47
@@ -538,7 +538,7 @@ module Stm₂-semantic where
         ifStm₂_then_else_ : Bexp₂ → Stm₂ → Stm₂ → Stm₂
         while_do₃_ : Bexp₂ → Stm₂ → Stm₂
 
-    data ⟨_,_⟩⇒₂_ : Stm₂ → State → State → Set where
+    data ⟨_,_⟩⇒₂_ : Stm₂ → States → States → Set where
         ASS-BSS         : ∀ {x a s v}
                         → s ⊢ a ⇒ₐ inj₂ v
                         → ⟨ (x ←₃ a) , s ⟩⇒₂ (s [ x ↦ v ])
@@ -575,7 +575,7 @@ module Stm₂-semantic where
 
     -- Section Begin Page 53
     open import Data.Product using (_×_; _,_)
-    data ⟨_⟩⇒₂⟨_⟩ : (Stm₂ × State) ⊎ State → (Stm₂ × State) ⊎ State → Set where
+    data ⟨_⟩⇒₂⟨_⟩ : (Stm₂ × States) ⊎ States → (Stm₂ × States) ⊎ States → Set where
         ASSₛₛₛ : ∀ {x a v s}
                → s ⊢ a ⇒ₐ inj₂ v
                → ⟨ inj₁ (x ←₃ a , s) ⟩⇒₂⟨ inj₂ (s [ x ↦ v ]) ⟩
@@ -604,7 +604,7 @@ module Stm₂-semantic where
 
     ⟨_⟩⇒₂⟨_⟩-transition = ⌞ Γ , ⟨_⟩⇒₂⟨_⟩ , T ⌟
         where
-            Γ = (Stm₂ × State) ⊎ State
+            Γ = (Stm₂ × States) ⊎ States
             T : Γ → Set
             T (inj₁ x) = ⊥
             T (inj₂ y) = ⊤
