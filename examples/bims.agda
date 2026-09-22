@@ -31,15 +31,19 @@ module Aexp₁-is-big-step where
     Aexp₁Semantic : TransitionSystem
     Aexp₁Semantic = ⌞ Γ₁ , _⇒₁_ , T₁ ⌟
 
-    Aexp₁-is-big-step : Set
-    Aexp₁-is-big-step = (x y : Γ₁) → (x ⇒₁ y) → (T₁ y)
-    Aexp₁-is-big-step-proof : Aexp₁-is-big-step
-    Aexp₁-is-big-step-proof (inj₂ x) (inj₂ y) = λ z → ttt
-    Aexp₁-is-big-step-proof (inj₁ x) (inj₂ y) = λ z → ttt
-    Aexp₁-is-big-step-proof x (inj₁ y) ()
+    Aexp₁-is-big-step-proof : s₁ ⇒₁ s₂ → T₁ s₂
+    Aexp₁-is-big-step-proof {inj₂ x} {inj₂ y} = λ z → ttt
+    Aexp₁-is-big-step-proof {inj₁ x} {inj₂ y} = λ z → ttt
+    Aexp₁-is-big-step-proof {x} {inj₁ y} ()
+
+    open import Relation.Nullary.Negation renaming (¬_ to not_)
+    Aexp₁-is-big-step-proof2 : s₁ ⇒₁ s₂ → not (T₁ s₁)
+    Aexp₁-is-big-step-proof2 {inj₂ x} {inj₂ y} = λ ()
+    Aexp₁-is-big-step-proof2 {inj₁ x} {inj₂ y} = λ z ()
+    Aexp₁-is-big-step-proof2 {x} {inj₁ y} ()
 
     Aexp₁big-semantic : BigStepSemantics Aexp₁Semantic
-    Aexp₁big-semantic = ⌈> Aexp₁-is-big-step-proof
+    Aexp₁big-semantic = ⌈> Aexp₁-is-big-step-proof Aexp₁-is-big-step-proof2
 
 -- Section End Page 32-33
 
@@ -129,10 +133,10 @@ module Aexp₂-state-transition-example where
     open import Data.String using (String; _<_; _<?_; _==_)
     open import States ℤ String _<_ <<str _<?_ _==_
 
-    code = ("i" ←₃ (inj₁ (N + 6))) Å₃
-        (while ¬₃ (inj₁ (V "i") ==₃ inj₁ (N + 0)) do₃ (
-            ("x" ←₃ inj₁(inj₁(V "x") + (inj₁(V "i")))) Å₃
-            ("i" ←₃ inj₁(inj₁(V "i") - inj₁(N + 2)))
+    code = ("i" ←₂ (inj₁ (N + 6))) Å₂
+        (while ¬₃ (inj₁ (V "i") ==₃ inj₁ (N + 0)) do₂ (
+            ("x" ←₂ inj₁(inj₁(V "x") + (inj₁(V "i")))) Å₂
+            ("i" ←₂ inj₁(inj₁(V "i") - inj₁(N + 2)))
         ))
 
     beginState = [] [ "x" ↦ + 5 ]
@@ -160,7 +164,7 @@ module Aexp₂-state-transition-example where
     open import Relation.Nullary.Negation using () renaming (¬_ to not_)
     open import Data.Empty using (⊥)
 
-    S = while inj₁(N + 0) ==₃ inj₁(N + 0) do₃ skip₃
+    S = while inj₁(N + 0) ==₃ inj₁(N + 0) do₂ skip₂
 
     neverTerminates : ∀ s → ∃ λ s´ → not ⟨ S , s ⟩⇒₂ s´
     neverTerminates s = [] , f
@@ -198,16 +202,16 @@ module Aexp₂-smallstep-example where
             inj₁(N + 3) <₃ inj₁(V "x")
         then
             (
-                ("x" ←₃ inj₁(inj₁(N + 3) + inj₁(V "x"))) Å₃
-                ("y" ←₃ inj₁(N + 4))
+                ("x" ←₂ inj₁(inj₁(N + 3) + inj₁(V "x"))) Å₂
+                ("y" ←₂ inj₁(N + 4))
             )
-        else skip₃
+        else skip₂
     s = [] [ "x" ↦ + 4 ]
 
     open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong)
 
     open TS.TransitionSystem ⟨_⟩⇒₂⟨_⟩-transition using (_⇒⟨_⟩_)
-    open TS.TransitionSystem using (_⇒∘⇒_; x⇒x)
+    open TS.TransitionSystem using (_⇒∘⇒*_; x⇒x)
     open import Data.Bool using (true)
 
     -- Problem 4.9
@@ -216,37 +220,37 @@ module Aexp₂-smallstep-example where
         inj₁ (S , s )
         ⇒⟨ 1 ⟩
         inj₁ ((
-            ("x" ←₃ inj₁(inj₁(N + 3) + inj₁(V "x"))) Å₃
-            ("y" ←₃ inj₁(N + 4))
+            ("x" ←₂ inj₁(inj₁(N + 3) + inj₁(V "x"))) Å₂
+            ("y" ←₂ inj₁(N + 4))
         ) , s)
-    transition1 = IF-TRUEₛₛₛ (GREATERTHAN-1-BSS NUM-BSS (VAR-BSS refl) (+<+ s≤s s≤s s≤s s≤s z≤n)) ⇒∘⇒ x⇒x
+    transition1 = IF-TRUEₛₛₛ (GREATERTHAN-1-BSS NUM-BSS (VAR-BSS refl) (+<+ s≤s s≤s s≤s s≤s z≤n)) ⇒∘⇒* x⇒x , refl
 
     -- There's only one transition from the start state
     f : s ⊢ inj₁ (inj₁ (N + 3) + inj₁ (V "x")) ⇒ₐ inj₂ (+ 7)
     f = NUM-BSS PLUS-BSS (VAR-BSS refl)
     transition2 :
         inj₁ (
-            ("x" ←₃ inj₁(inj₁(N + 3) + inj₁(V "x"))) Å₃
-            ("y" ←₃ inj₁(N + 4))
+            ("x" ←₂ inj₁(inj₁(N + 3) + inj₁(V "x"))) Å₂
+            ("y" ←₂ inj₁(N + 4))
             , s
         )
         ⇒⟨ 1 ⟩
         inj₁ (
-            ("y" ←₃ inj₁(N + 4))
+            ("y" ←₂ inj₁(N + 4))
             , (s [ "x" ↦ + 7 ])
         )
-    transition2 = COMP-2ₛₛₛ (ASSₛₛₛ (NUM-BSS PLUS-BSS (VAR-BSS refl))) ⇒∘⇒ x⇒x
+    transition2 = COMP-2ₛₛₛ (ASSₛₛₛ (NUM-BSS PLUS-BSS (VAR-BSS refl))) ⇒∘⇒* x⇒x , refl
 
     transition3 :
         inj₁ (
-            ("y" ←₃ inj₁(N + 4))
+            ("y" ←₂ inj₁(N + 4))
             , (s [ "x" ↦ + 7 ])
         )
         ⇒⟨ 1 ⟩
         inj₂ (
             s [ "x" ↦ + 7 ] [ "y" ↦ + 4 ]
         )
-    transition3 = ASSₛₛₛ NUM-BSS ⇒∘⇒ x⇒x
+    transition3 = ASSₛₛₛ NUM-BSS ⇒∘⇒* x⇒x , refl
 
 -- Section End Page 54
 
@@ -264,7 +268,7 @@ module SmallStep-BigStep-Equivalence where
     open import Data.Sum using (inj₁; inj₂)
     open import Data.Bool using (false; true)
     open import TransitionSystems using () renaming (TransitionSystem to T)
-    open T ⟨_⟩⇒₂⟨_⟩-transition using (_⇒∘⇒_; x⇒x; _⇒⟨_⟩_; _⇒*_; _⇒∘_; _⇒_; _∘⇒∘_; x⇒*x)
+    open T ⟨_⟩⇒₂⟨_⟩-transition using (x⇒x; _⇒⟨_⟩_; _⇒∘⇒*_; _⇒*_; _∘⇒*∘_; _⇒_; length)
 
     open import Data.Integer using (ℤ; +_)
     open import Data.String using (String; _<?_) renaming (_==_ to _==s_; _<_ to _<s_)
@@ -272,29 +276,33 @@ module SmallStep-BigStep-Equivalence where
 
     L4-12 : {S₁ S₂ : Stm₂} {s s´ : States}
           → inj₁(S₁ , s) ⇒* inj₂ s´
-          → inj₁(S₁ Å₃ S₂ , s) ⇒* inj₁(S₂ , s´)
-    L4-12 (suc fst , fst₁ ⇒∘⇒ x⇒x) = COMP-2ₛₛₛ fst₁ ⇒∘ x⇒*x
-    L4-12 (suc k , (_⇒∘⇒_ {γ˝ = inj₁ S₁´,s˝} premise⟨S₁,s⟩⇒⟨S₁´,s˝⟩ ⟨S₁´,s˝⟩⇒ᵏy)) = COMP-1ₛₛₛ premise⟨S₁,s⟩⇒⟨S₁´,s˝⟩ ⇒∘ L4-12 (k , ⟨S₁´,s˝⟩⇒ᵏy)
+          → inj₁(S₁ Å₂ S₂ , s) ⇒* inj₁(S₂ , s´)
+    L4-12 (fst₁ ⇒∘⇒* x⇒x) = COMP-2ₛₛₛ fst₁ ⇒∘⇒* x⇒x
+    L4-12 (_⇒∘⇒*_ {j = inj₁ S₁´,s˝} premise⟨S₁,s⟩⇒⟨S₁´,s˝⟩ ⟨S₁´,s˝⟩⇒*y) = COMP-1ₛₛₛ premise⟨S₁,s⟩⇒⟨S₁´,s˝⟩ T.⇒∘⇒* L4-12 ⟨S₁´,s˝⟩⇒*y
 
     -- Theorem 4.11 -- Apparently this should be hard to prove, and needs the lemma, though agda figures it out without the lemma
     T4-11 : {S : Stm₂} → {s s´ : States} → ⟨ S , s ⟩⇒₂ s´ → inj₁(S , s) ⇒* inj₂ s´
-    T4-11 (ASS-BSS x) = ASSₛₛₛ x ⇒∘ x⇒*x
-    T4-11 SKIP-BSS = SKIPₛₛₛ ⇒∘ x⇒*x
-    T4-11 (COMP-BSS ⟨S₁,s⟩⇒s´ ⟨S₂,s´⟩⇒s˝) = L4-12 (T4-11 ⟨S₁,s⟩⇒s´) ∘⇒∘ T4-11 ⟨S₂,s´⟩⇒s˝
-    T4-11 (IF-TRUE-BSS x x₁) =  IF-TRUEₛₛₛ x₁ ⇒∘ T4-11 x
-    T4-11 (IF-FALSE-BSS x x₁) = IF-FALSEₛₛₛ x₁ ⇒∘ T4-11 x
-    T4-11 (WHILE-TRUE-BSS s⊢b⇒ᵇtt ⟨S,s⟩⇒s˝ ⟨while-b-do-S,s˝⟩⇒s´) = WHILEₛₛₛ ⇒∘ IF-TRUEₛₛₛ s⊢b⇒ᵇtt ⇒∘ L4-12 (T4-11 ⟨S,s⟩⇒s˝) ∘⇒∘ T4-11 ⟨while-b-do-S,s˝⟩⇒s´
-    T4-11 (WHILE-FALSE-BSS s⊢b⇒ᵇff) = WHILEₛₛₛ ⇒∘ IF-FALSEₛₛₛ s⊢b⇒ᵇff ⇒∘ SKIPₛₛₛ ⇒∘ x⇒*x
+    T4-11 (ASS-BSS x) = ASSₛₛₛ x ⇒∘⇒* x⇒x
+    T4-11 SKIP-BSS = SKIPₛₛₛ ⇒∘⇒* x⇒x
+    T4-11 (COMP-BSS ⟨S₁,s⟩⇒s´ ⟨S₂,s´⟩⇒s˝) = L4-12 (T4-11 ⟨S₁,s⟩⇒s´) ∘⇒*∘ T4-11 ⟨S₂,s´⟩⇒s˝
+    T4-11 (IF-TRUE-BSS x x₁) =  IF-TRUEₛₛₛ x₁ ⇒∘⇒* T4-11 x
+    T4-11 (IF-FALSE-BSS x x₁) = IF-FALSEₛₛₛ x₁ ⇒∘⇒* T4-11 x
+    T4-11 (WHILE-TRUE-BSS s⊢b⇒ᵇtt ⟨S,s⟩⇒s˝ ⟨while-b-do-S,s˝⟩⇒s´) = WHILEₛₛₛ ⇒∘⇒* IF-TRUEₛₛₛ s⊢b⇒ᵇtt ⇒∘⇒* L4-12 (T4-11 ⟨S,s⟩⇒s˝) ∘⇒*∘ T4-11 ⟨while-b-do-S,s˝⟩⇒s´
+    T4-11 (WHILE-FALSE-BSS s⊢b⇒ᵇff) = WHILEₛₛₛ ⇒∘⇒* IF-FALSEₛₛₛ s⊢b⇒ᵇff ⇒∘⇒* SKIPₛₛₛ ⇒∘⇒* x⇒x
 
-    L4-14 : {S₁ S₂ : Stm₂} {s s˝ : States} {k : ℕ}
-          → inj₁(S₁ Å₃ S₂ , s) ⇒⟨ k ⟩ inj₂ s˝
+    open import Relation.Binary.PropositionalEquality using (cong; trans)
+    L4-14 : {S₁ S₂ : Stm₂} {s s˝ : States}
+          → (t : inj₁(S₁ Å₂ S₂ , s) ⇒* inj₂ s˝)
           → ∃ λ s´ →
             Σ (inj₁(S₁ , s ) ⇒* inj₂ s´) λ lSeq →
             Σ (inj₁(S₂ , s´) ⇒* inj₂ s˝) λ rSeq →
-            k ≡ lSeq .proj₁ +ℕ rSeq .proj₁
-    L4-14 (COMP-1ₛₛₛ x ⇒∘⇒ x₁) with L4-14 x₁
-    L4-14 (COMP-1ₛₛₛ x ⇒∘⇒ x₁) | s´ , xx , y , refl = s´ , x ⇒∘ xx , y , refl
-    L4-14 {k = suc (suc k)} (COMP-2ₛₛₛ x ⇒∘⇒ x₁) = _ , x ⇒∘ x⇒*x , (_ , x₁) , refl
+            length t ≡ length lSeq +ℕ length rSeq
+    L4-14 (COMP-1ₛₛₛ x ⇒∘⇒* x₁) =
+        L4-14 x₁ .proj₁ ,
+        x ⇒∘⇒* L4-14 x₁ .proj₂ .proj₁ ,
+        L4-14 x₁ .proj₂ .proj₂ .proj₁ ,
+        cong suc (L4-14 x₁ .proj₂ .proj₂ .proj₂)
+    L4-14 (COMP-2ₛₛₛ x ⇒∘⇒* x₁) = _ , x ⇒∘⇒* x⇒x , x₁ , refl
 
     step-then-big : {S S´ : Stm₂} {s s´ s˝ : States}
                   → inj₁(S , s) ⇒ inj₁(S´ , s´)
@@ -309,21 +317,22 @@ module SmallStep-BigStep-Equivalence where
     step-then-big WHILEₛₛₛ (IF-FALSE-BSS SKIP-BSS x) = WHILE-FALSE-BSS x
 
     -- Theorem 4.13
-    T4-13 : {S : Stm₂} {s s´ : States} {k : ℕ}
-          → inj₁(S , s) ⇒⟨ k ⟩ inj₂ s´
+    T4-13 : {S : Stm₂} {s s´ : States}
+          → inj₁(S , s) ⇒* inj₂ s´
           → ⟨ S , s ⟩⇒₂ s´
-    T4-13 (ASSₛₛₛ x ⇒∘⇒ x⇒x) = ASS-BSS x
-    T4-13 (SKIPₛₛₛ ⇒∘⇒ x⇒x) = SKIP-BSS
-    T4-13 (COMP-1ₛₛₛ ⟨S₁,s⟩⇒₂⟨S₁´,s´⟩  ⇒∘⇒  ⟨S₁´:S₂,s´⟩⇒s´₁) with T4-13 ⟨S₁´:S₂,s´⟩⇒s´₁
+    T4-13 (ASSₛₛₛ x ⇒∘⇒* x⇒x) = ASS-BSS x
+    T4-13 (SKIPₛₛₛ ⇒∘⇒* x⇒x) = SKIP-BSS
+    T4-13 (COMP-1ₛₛₛ ⟨S₁,s⟩⇒₂⟨S₁´,s´⟩  ⇒∘⇒*  ⟨S₁´:S₂,s´⟩⇒s´₁) with T4-13 ⟨S₁´:S₂,s´⟩⇒s´₁
     ... | COMP-BSS ⟨S₁´,s₁´⟩⇒s˝ ⟨S₂,s˝⟩⇒s´ = COMP-BSS (step-then-big ⟨S₁,s⟩⇒₂⟨S₁´,s´⟩ ⟨S₁´,s₁´⟩⇒s˝) ⟨S₂,s˝⟩⇒s´
 
-    T4-13 (COMP-2ₛₛₛ x ⇒∘⇒ snd) = COMP-BSS (T4-13 (x ⇒∘⇒ x⇒x)) (T4-13 snd)
-    T4-13 (IF-TRUEₛₛₛ x ⇒∘⇒ snd) = IF-TRUE-BSS (T4-13 snd) x
-    T4-13 (IF-FALSEₛₛₛ x ⇒∘⇒ snd) = IF-FALSE-BSS (T4-13 snd) x
+    T4-13 (COMP-2ₛₛₛ (ASSₛₛₛ x) ⇒∘⇒* snd) = COMP-BSS (ASS-BSS x) (T4-13 snd)
+    T4-13 (COMP-2ₛₛₛ SKIPₛₛₛ ⇒∘⇒* snd) = COMP-BSS SKIP-BSS (T4-13 snd)
+    T4-13 (IF-TRUEₛₛₛ x ⇒∘⇒* snd) = IF-TRUE-BSS (T4-13 snd) x
+    T4-13 (IF-FALSEₛₛₛ x ⇒∘⇒* snd) = IF-FALSE-BSS (T4-13 snd) x
 
-    T4-13 (WHILEₛₛₛ ⇒∘⇒ IF-TRUEₛₛₛ x ⇒∘⇒ snd) with T4-13 snd
+    T4-13 (WHILEₛₛₛ ⇒∘⇒* IF-TRUEₛₛₛ x ⇒∘⇒* snd) with T4-13 snd
     ... | COMP-BSS a b = WHILE-TRUE-BSS x a b
-    T4-13 (WHILEₛₛₛ ⇒∘⇒ IF-FALSEₛₛₛ x ⇒∘⇒ SKIPₛₛₛ ⇒∘⇒ x⇒x) = WHILE-FALSE-BSS x
+    T4-13 (WHILEₛₛₛ ⇒∘⇒* IF-FALSEₛₛₛ x ⇒∘⇒* SKIPₛₛₛ ⇒∘⇒* x⇒x) = WHILE-FALSE-BSS x
 
 
 -- Section End Page 55-58

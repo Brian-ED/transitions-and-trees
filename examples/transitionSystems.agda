@@ -13,27 +13,17 @@ data Γ₁ : Set where
     γ₄ : Γ₁
 
 _⇒₁_ : Γ₁ → Γ₁ → Set
-γ₁ ⇒₁ γ₁ = ⊥
-γ₁ ⇒₁ γ₂ = ⊤
-γ₁ ⇒₁ γ₃ = ⊥
-γ₁ ⇒₁ γ₄ = ⊤
-γ₂ ⇒₁ γ₁ = ⊥
-γ₂ ⇒₁ γ₂ = ⊥
-γ₂ ⇒₁ γ₃ = ⊤
-γ₂ ⇒₁ γ₄ = ⊥
 γ₃ ⇒₁ y  = ⊥
-γ₄ ⇒₁ y  = ⊥
+x  ⇒₁ γ₃ = ⊤
+x ⇒₁ y = ⊥
 
 T₁_ : Γ₁ → Set
 T₁ γ₁ = ⊥
 T₁ γ₂ = ⊥
 T₁ γ₃ = ⊤
-T₁ γ₄ = ⊤
+T₁ γ₄ = ⊥
 
 testSystem : TransitionSystem
 testSystem = ⌞ Γ₁ , _⇒₁_ , T₁_ ⌟
-
-open TransitionSystem testSystem
-x = _⇒⟨_⟩_
 
 -- Section End Page 30

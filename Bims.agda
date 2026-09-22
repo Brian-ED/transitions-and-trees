@@ -429,13 +429,19 @@ module Aexp₂-semantic where
     T₃ (inj₁ x) = ⊥
 
     Aexp₂Semantic : States → TransitionSystem
-    Aexp₂Semantic s = ⌞ (Aexp₂ ⊎ Num) , (_⊢_⇒ₐ_ s) , T₃ ⌟
+    Aexp₂Semantic s = ⌞ Aexp₂ ⊎ Num , _⊢_⇒ₐ_ s , T₃ ⌟
 
-    Aexp₂-is-big-step-proof : ∀ s x y → s ⊢ x ⇒ₐ y → T₃ y
-    Aexp₂-is-big-step-proof _ _ (inj₂ _) _ = ttt
+    Aexp₂-is-big-step-proof : ∀ s {x y} → s ⊢ x ⇒ₐ y → T₃ y
+    Aexp₂-is-big-step-proof _ {_} {inj₂ _} _ = ttt
+
+    open import Relation.Nullary.Negation using (¬_)
+    open import Relation.Binary.PropositionalEquality using (refl)
+
+    Aexp₂-is-big-step-proof2 : ∀ s {x y} → s ⊢ x ⇒ₐ y → ¬ T₃ x
+    Aexp₂-is-big-step-proof2 _ {inj₁ _} _ = λ ()
 
     Aexp₂big-semantic : ∀ s → BigStepSemantics (Aexp₂Semantic s)
-    Aexp₂big-semantic s = ⌈> (Aexp₂-is-big-step-proof s)
+    Aexp₂big-semantic s = ⌈> (Aexp₂-is-big-step-proof s) (Aexp₂-is-big-step-proof2 s)
 
     -- Section End Page 44-45
 
@@ -512,7 +518,7 @@ module Stm₂-semantic where
     open import BigAndSmallStepSemantics using (⌈>; BigStepSemantics)
     open import Data.Empty using (⊥)
     open import Data.Unit using (⊤) renaming (tt to ttt)
-    open import Relation.Nullary.Negation using () renaming (¬_ to not_)
+    open import Relation.Nullary.Negation using (¬_)
     open import Agda.Builtin.Maybe using (Maybe; just; nothing)
     open import Data.Sum using (_⊎_; inj₁; inj₂)
     open import Data.Bool using (Bool) renaming (true to tt; false to ff)
@@ -532,24 +538,24 @@ module Stm₂-semantic where
     -- Section Begin Page 47
 
     data Stm₂ : Set where
-        skip₃ : Stm₂
-        _←₃_ : Var → Aexp₂ ⊎ Num → Stm₂
-        _Å₃_ : Stm₂ → Stm₂ → Stm₂
+        skip₂ : Stm₂
+        _←₂_ : Var → Aexp₂ ⊎ Num → Stm₂
+        _Å₂_ : Stm₂ → Stm₂ → Stm₂
         ifStm₂_then_else_ : Bexp₂ → Stm₂ → Stm₂ → Stm₂
-        while_do₃_ : Bexp₂ → Stm₂ → Stm₂
+        while_do₂_ : Bexp₂ → Stm₂ → Stm₂
 
     data ⟨_,_⟩⇒₂_ : Stm₂ → States → States → Set where
         ASS-BSS         : ∀ {x a s v}
                         → s ⊢ a ⇒ₐ inj₂ v
-                        → ⟨ (x ←₃ a) , s ⟩⇒₂ (s [ x ↦ v ])
+                        → ⟨ (x ←₂ a) , s ⟩⇒₂ (s [ x ↦ v ])
 
         SKIP-BSS        : ∀ {s}
-                        → ⟨ skip₃ , s ⟩⇒₂ s
+                        → ⟨ skip₂ , s ⟩⇒₂ s
 
         COMP-BSS        : ∀ {S₁ S₂ s s´ s˝}
                         → ⟨ S₁ , s ⟩⇒₂ s˝
                         → ⟨ S₂ , s˝ ⟩⇒₂ s´
-                        → ⟨ (S₁ Å₃ S₂) , s ⟩⇒₂ s´
+                        → ⟨ (S₁ Å₂ S₂) , s ⟩⇒₂ s´
 
         IF-TRUE-BSS     : ∀ {S₁ S₂ s s´ b}
                         → ⟨ S₁ , s ⟩⇒₂ s´
@@ -564,12 +570,12 @@ module Stm₂-semantic where
         WHILE-TRUE-BSS  : ∀ {S s s´ s˝ b}
                         → s ⊢ b ⇒₂b tt ᵇ
                         → ⟨ S , s ⟩⇒₂ s˝
-                        → ⟨ (while b do₃ S) , s˝ ⟩⇒₂ s´
-                        → ⟨ (while b do₃ S) , s ⟩⇒₂ s´
+                        → ⟨ (while b do₂ S) , s˝ ⟩⇒₂ s´
+                        → ⟨ (while b do₂ S) , s ⟩⇒₂ s´
 
         WHILE-FALSE-BSS : ∀ {S s b}
                         → s ⊢ b ⇒₂b ff ᵇ
-                        → ⟨ (while b do₃ S) , s ⟩⇒₂ s
+                        → ⟨ (while b do₂ S) , s ⟩⇒₂ s
 
     -- Section End Page 47
 
@@ -578,18 +584,18 @@ module Stm₂-semantic where
     data ⟨_⟩⇒₂⟨_⟩ : (Stm₂ × States) ⊎ States → (Stm₂ × States) ⊎ States → Set where
         ASSₛₛₛ : ∀ {x a v s}
                → s ⊢ a ⇒ₐ inj₂ v
-               → ⟨ inj₁ (x ←₃ a , s) ⟩⇒₂⟨ inj₂ (s [ x ↦ v ]) ⟩
+               → ⟨ inj₁ (x ←₂ a , s) ⟩⇒₂⟨ inj₂ (s [ x ↦ v ]) ⟩
 
         SKIPₛₛₛ : ∀ {s}
-                → ⟨ inj₁ (skip₃ , s) ⟩⇒₂⟨ inj₂ s ⟩
+                → ⟨ inj₁ (skip₂ , s) ⟩⇒₂⟨ inj₂ s ⟩
 
         COMP-1ₛₛₛ : ∀ {s s´ S₁ S₁´ S₂}
                   → ⟨ inj₁ (S₁ , s) ⟩⇒₂⟨ inj₁ (S₁´ , s´) ⟩
-                  → ⟨ inj₁ (S₁ Å₃ S₂ , s) ⟩⇒₂⟨ inj₁ (S₁´ Å₃ S₂ , s´) ⟩
+                  → ⟨ inj₁ (S₁ Å₂ S₂ , s) ⟩⇒₂⟨ inj₁ (S₁´ Å₂ S₂ , s´) ⟩
 
         COMP-2ₛₛₛ : ∀ {s s´ S₁ S₂}
                   → ⟨ inj₁ (S₁ , s) ⟩⇒₂⟨ inj₂ s´ ⟩
-                  → ⟨ inj₁ (S₁ Å₃ S₂ , s) ⟩⇒₂⟨ inj₁ (S₂ , s´) ⟩
+                  → ⟨ inj₁ (S₁ Å₂ S₂ , s) ⟩⇒₂⟨ inj₁ (S₂ , s´) ⟩
 
         IF-TRUEₛₛₛ : ∀ {s b S₁ S₂}
                    → s ⊢ b ⇒₂b tt ᵇ
@@ -600,7 +606,7 @@ module Stm₂-semantic where
                     → ⟨ inj₁ (ifStm₂ b then S₁ else S₂ , s) ⟩⇒₂⟨ inj₁ (S₂ , s) ⟩
 
         WHILEₛₛₛ : ∀ {s b S}
-                 → ⟨ inj₁ (while b do₃ S , s) ⟩⇒₂⟨ inj₁ (ifStm₂ b then S Å₃ (while b do₃ S) else skip₃ , s) ⟩
+                 → ⟨ inj₁ (while b do₂ S , s) ⟩⇒₂⟨ inj₁ (ifStm₂ b then S Å₂ (while b do₂ S) else skip₂ , s) ⟩
 
     ⟨_⟩⇒₂⟨_⟩-transition = ⌞ Γ , ⟨_⟩⇒₂⟨_⟩ , T ⌟
         where
@@ -612,3 +618,117 @@ module Stm₂-semantic where
     -- Imported via: open TransitionSystem ⟨_⟩⇒₂⟨_⟩-transition public
 
     -- Section End Page 53
+
+-- Section Begin Page 65
+
+module Stm₃-bss-semantic where
+    open import Data.Integer using () renaming (ℤ to Num; _+_ to _+ℤ_; _-_ to _-ℤ_; _*_ to _*ℤ_; _<_ to _<ℤ_)
+    open import Data.String using () renaming (String to Var)
+    open import Relation.Binary.PropositionalEquality using (_≡_)
+    open import TransitionSystems using (TransitionSystem; ⌞_,_,_⌟)
+    open import BigAndSmallStepSemantics using (⌈>; BigStepSemantics)
+    open import Data.Empty using (⊥)
+    open import Data.Unit using (⊤) renaming (tt to ttt)
+    open import Relation.Nullary.Negation using () renaming (¬_ to not_)
+    open import Agda.Builtin.Maybe using (Maybe; just; nothing)
+    open import Data.Sum using (_⊎_; inj₁; inj₂)
+    open import Data.Bool using (Bool) renaming (true to tt; false to ff)
+    open import Data.Product using (_×_; _,_)
+
+    open import Data.String using (String; _<_; _<?_; _==_)
+    <<str = λ a b c → <-isStrictPartialOrder-≈ .trans {a} {b} {c}
+        where
+            open import Relation.Binary.Structures using (IsStrictPartialOrder)
+            open IsStrictPartialOrder using (trans)
+            open import Data.String.Properties using (<-isStrictPartialOrder-≈)
+
+    open import States Num String _<_ <<str _<?_ _==_ using (States; _[_↦_])
+
+    open Aexp₂-semantic using (Aexp₂; Bexp₂; _⊢_⇒ₐ_; _⊢_⇒₂b_; _ᵇ; ¬₃_; NOT-2-BSS_; NOT-1-BSS_)
+
+    data Stm₃ : Set where
+        skip₃ : Stm₃
+        _←₃_ : Var → Aexp₂ ⊎ Num → Stm₃
+        _Å₃_ : Stm₃ → Stm₃ → Stm₃
+        ifStm₃_then_else_ : Bexp₂ → Stm₃ → Stm₃ → Stm₃
+        while_do₃_ : Bexp₂ → Stm₃ → Stm₃
+        repeat_until_ : Stm₃ → Bexp₂ → Stm₃
+
+    Γ = Stm₃ × States ⊎ States
+
+    -- Table 5.1
+    data ⟨_⟩⇒_ : Γ → Γ → Set
+    ⟨_⟩⇒₂_ : (IN : Stm₃ × States) → (OUT : States) → Set
+    ⟨ S ⟩⇒₂ s´ = ⟨ inj₁ S ⟩⇒ inj₂ s´
+    data ⟨_⟩⇒_ where
+
+        ASS-BSS         : ∀ {x a s v}
+                        → s ⊢ a ⇒ₐ inj₂ v
+                        → ⟨ x ←₃ a , s ⟩⇒₂ (s [ x ↦ v ])
+
+        SKIP-BSS        : ∀ {s}
+                        → ⟨ skip₃ , s ⟩⇒₂ s
+
+        COMP-BSS        : ∀ {S₁ S₂ s s´ s˝}
+                        → ⟨ S₁ , s ⟩⇒₂ s˝
+                        → ⟨ S₂ , s˝ ⟩⇒₂ s´
+                        → ⟨ S₁ Å₃ S₂ , s ⟩⇒₂ s´
+
+        IF-TRUE-BSS     : ∀ {S₁ S₂ s s´ b}
+                        → ⟨ S₁ , s ⟩⇒₂ s´
+                        → s ⊢ b ⇒₂b tt ᵇ
+                        → ⟨ (ifStm₃ b then S₁ else S₂) , s ⟩⇒₂ s´
+
+        IF-FALSE-BSS    : ∀ {S₁ S₂ s s´ b}
+                        → ⟨ S₂ , s ⟩⇒₂ s´
+                        → s ⊢ b ⇒₂b ff ᵇ
+                        → ⟨ (ifStm₃ b then S₁ else S₂) , s ⟩⇒₂ s´
+
+        WHILE-TRUE-BSS  : ∀ {S s s´ s˝ b}
+                        → s ⊢ b ⇒₂b tt ᵇ
+                        → ⟨ S , s ⟩⇒₂ s˝
+                        → ⟨ (while b do₃ S) , s˝ ⟩⇒₂ s´
+                        → ⟨ (while b do₃ S) , s ⟩⇒₂ s´
+
+        WHILE-FALSE-BSS : ∀ {S s b}
+                        → s ⊢ b ⇒₂b ff ᵇ
+                        → ⟨ (while b do₃ S) , s ⟩⇒₂ s
+
+        REPEAT-TRUE-BSS : ∀ {S b s s´}
+                          → ⟨ S , s ⟩⇒₂ s´
+                          → s´ ⊢ b ⇒₂b tt ᵇ
+                          → ⟨ repeat S until b , s ⟩⇒₂ s´
+
+        REPEAT-FALSE-BSS : ∀ {S b s s´ s˝}
+                          → ⟨ S , s ⟩⇒₂ s´
+                          → s´ ⊢ b ⇒₂b ff ᵇ
+                          → ⟨ repeat S until b , s´ ⟩⇒₂ s˝
+                          → ⟨ repeat S until b , s ⟩⇒₂ s˝
+
+    ⟨_⟩⇒₂⟨_⟩-transition = ⌞ Γ , ⟨_⟩⇒_ , T ⌟
+        where
+            T : Γ → Set
+            T (inj₁ x) = ⊥
+            T (inj₂ y) = ⊤
+
+    -- Theorem 5.2 For all s ∈ States we have 〈repeat S until b, s〉 → s′ if and only if 〈S; while ¬b do S, s〉 → s′
+
+    open import Data.Product using (proj₁; proj₂)
+
+    A = λ S b s´ s → ⟨ repeat S until b , s ⟩⇒₂ s´
+    B = λ S b s´ s → ⟨ S Å₃ (while ¬₃ b do₃ S) , s ⟩⇒₂ s´
+    theoremLeft : ∀ {S b s s´} → A S b s´ s → B S b s´ s
+    theoremLeft {S} {b} {s} {s´} (REPEAT-TRUE-BSS x x₁) = COMP-BSS x (WHILE-FALSE-BSS (NOT-2-BSS x₁))
+    theoremLeft {S} {b} {s} {s´} (REPEAT-FALSE-BSS {s´ = s´₂} x x₁ x₂) with theoremLeft x₂
+    ... | COMP-BSS p p₁ = COMP-BSS x (WHILE-TRUE-BSS (_⊢_⇒₂b_.NOT-1-BSS x₁) p p₁)
+
+    theoremRight : ∀ {S b s s´} → B S b s´ s → A S b s´ s
+    theoremRight {S} {b} {s} {s´} (COMP-BSS x y) = theoremRightMinor x y
+        where
+            -- To avoid a failed termination check by Agda, I made a minor version
+            -- which separates the COMP-BSS into two arguments, making Agda happy
+            theoremRightMinor : ∀ {S b s s´ s˝} → ⟨ S , s ⟩⇒₂ s´ → ⟨(while ¬₃ b do₃ S) , s´ ⟩⇒₂ s˝ → ⟨ repeat S until b , s ⟩⇒₂ s˝
+            theoremRightMinor {S} {b} {s} {s´} {s˝} x (WHILE-FALSE-BSS (NOT-2-BSS x₁)) = REPEAT-TRUE-BSS x x₁
+            theoremRightMinor {S} {b} {s} {s´} {s˝} x (WHILE-TRUE-BSS (NOT-1-BSS x₁) x₂ x₃) = REPEAT-FALSE-BSS x x₁ (theoremRightMinor x₂ x₃)
+
+-- Section End Page 65

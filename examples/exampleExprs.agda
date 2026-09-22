@@ -10,25 +10,25 @@ import examples.bims
 -- Section Start Page 38. This label is place 1
 -- page 28 is also done in TransitionSystems.agda
 
-open Bims.Aexp₁-smallstep-semantic hiding (_⇒⟨_⟩_; _⇒*_; _⇒∘⇒_; x⇒x)
+open Bims.Aexp₁-smallstep-semantic
 open T (examples.bims.Aexp₁-small-step-semantic.Aexp₁ssSemantic)
 
 exampleAexp₂1 : ((N + 3 + N + 12) * (N + 4 * (N + 5 * N + 9)))
          ⇒⟨ 3 ⟩ (V + 15 * (N + 4 * (N + 5 * N + 9)))
 exampleAexp₂1 = (MULT-1ₛₛₛ PLUS-1ₛₛₛ NUMₛₛₛ)
-            ⇒∘⇒ (MULT-1ₛₛₛ PLUS-2ₛₛₛ NUMₛₛₛ)
-            ⇒∘⇒ (MULT-1ₛₛₛ PLUS-3ₛₛₛ)
-            ⇒∘⇒ x⇒x
+            ⇒∘⇒* (MULT-1ₛₛₛ PLUS-2ₛₛₛ NUMₛₛₛ)
+            ⇒∘⇒* (MULT-1ₛₛₛ PLUS-3ₛₛₛ)
+            ⇒∘⇒* x⇒x , refl
 
 -- Problem 3.12
 exampleAexp₂2 : ((N + 2 + N + 3) * (N + 4 + N + 9)) ⇒* V + 65
-exampleAexp₂2 = 7 , (MULT-1ₛₛₛ PLUS-1ₛₛₛ NUMₛₛₛ)
-                ⇒∘⇒ (MULT-1ₛₛₛ PLUS-2ₛₛₛ NUMₛₛₛ)
-                ⇒∘⇒ (MULT-1ₛₛₛ PLUS-3ₛₛₛ)
-                ⇒∘⇒ (MULT-2ₛₛₛ PLUS-1ₛₛₛ NUMₛₛₛ)
-                ⇒∘⇒ (MULT-2ₛₛₛ PLUS-2ₛₛₛ NUMₛₛₛ)
-                ⇒∘⇒ (MULT-2ₛₛₛ PLUS-3ₛₛₛ)
-                ⇒∘⇒ (MULT-3ₛₛₛ)
-                ⇒∘⇒ x⇒x
+exampleAexp₂2 = (MULT-1ₛₛₛ PLUS-1ₛₛₛ NUMₛₛₛ)
+                ⇒∘⇒* (MULT-1ₛₛₛ PLUS-2ₛₛₛ NUMₛₛₛ)
+                ⇒∘⇒* (MULT-1ₛₛₛ PLUS-3ₛₛₛ)
+                ⇒∘⇒* (MULT-2ₛₛₛ PLUS-1ₛₛₛ NUMₛₛₛ)
+                ⇒∘⇒* (MULT-2ₛₛₛ PLUS-2ₛₛₛ NUMₛₛₛ)
+                ⇒∘⇒* (MULT-2ₛₛₛ PLUS-3ₛₛₛ)
+                ⇒∘⇒* (MULT-3ₛₛₛ)
+                ⇒∘⇒* x⇒x
 
 -- Section End Page 38
