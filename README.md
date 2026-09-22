@@ -1,4 +1,4 @@
-#  Proving the book Transition and Trees by Hans Hüttel in Agda
+#  Proving the book Transitions and Trees by Hans Hüttel in Agda
 INCOMPLETE.
 Progress is page 66 out of 267.
 
@@ -33,14 +33,14 @@ Lemma 4.12 assumes that the transition sequence `a⇒b⇒ᵏc` can be rewritten 
 
 Theorem 4.13 at the start of page 59 assumes that the transition sequence `a⇒b⇒ᵏc` can be rewritten as `a⇒⟨S,s⟩⇒ᵏc`, which is a mistake, `b` can also be a state. Trivially fixed by proving this case.
 
-Lemma 4.14 has ⟨S₁;S₂⟩⇒ᵏs˝, which isn't a valid statement, state in left side is ommitted.
+Lemma 4.14 has ⟨S₁;S₂⟩⇒ᵏs˝, which isn't a valid statement, state in left side is omitted.
 
 Lemma 4.14, sentence "k₂ = k₂₂". k₂₂ is never defined, only k₂₁, which I have assumed the author meant.
 
 Table 9.1 generalized variables, two different rules are given the same name "GVAR-1BSS".
 
 ### Opinionated
-The generic transition ⇒ᵏ in transition systems I believe would be simpler if instead of defining it using step 0 and step suc k, and defining ⇒* afterwards, you could just define ⇒* first. Every induction, instead of being reliant on an intiger, could just rely on the length of the transition sequence itself. The reason I believe this is simpler is that it avoids the duplicate information from k, since it's determined by the transition sequence anyways. Duplicate information is annoying when unifying things. It could be that I only believe this because Agda proves by construction, and needs unification a lot.
+The generic transition ⇒ᵏ in transition systems I believe would be simpler if instead of defining it using step 0 and step suc k, and defining ⇒* afterwards, you could just define ⇒* first. Every induction, instead of being reliant on an integer, could just rely on the length of the transition sequence itself. The reason I believe this is simpler is that it avoids the duplicate information from k, since it's determined by the transition sequence anyways. Duplicate information is annoying when unifying things. It could be that I only believe this because Agda proves by construction, and needs unification a lot.
 
 In the proof of Theorem 4.13, there's a form of referencing done for the sentence "transition sequence (4.11)", which isn't done before this point, where parenthesis referencing their definition is done. This implicitly applies the lemma 4.11. It is, in my opinion, confusing to introduce new syntax never before defined or mentioned.
 
@@ -50,4 +50,4 @@ Theorem 4.13 defines s˝´ and yet re-uses s˝. They are equal, so not a mistake
 
 The book never defines which set theory it assumes.
 
-Tabele 3.2 table and 4.1 have identical descriptions but different content. Both claim to be transition rules for Aexp but the two "Aexp"s are different.
+Table 3.2 table and 4.1 have identical descriptions but different content. Both claim to be transition rules for Aexp but the two "Aexp"s are different.
