@@ -28,7 +28,6 @@ cmp : (a : ID × 𝕍) → (b : ID × 𝕍) → Relation.Nullary.Dec (a .proj₁
 cmp (a , b) (x , y) = a <? x
 
 States = List# {r = ℓ₂} {a = ℓ₁ Level.⊔ ℓ₂} (ID × 𝕍) ⌊ cmp ⌋
-myFresh = fresh (ID × 𝕍) ⌊ cmp ⌋
 
 toDec : ∀ {s₁ s} → s₁ < s → ⌊ s₁ <? s ⌋
 toDec {s₁} {s} x .Level.lower with s₁ <? s
@@ -39,17 +38,17 @@ fromDec : ∀ {id} {id₁} → ⌊ id <? id₁ ⌋ → id < id₁
 fromDec {id} {id₁} _ with id <? id₁
 fromDec _ | yes p = p
 
-appendFresh : ∀ {s n id val xs₁} x → s < id → myFresh (s , n) (cons (id , val) xs₁ x)
+appendFresh : ∀ {s n id val xs₁} x → s < id → fresh (ID × 𝕍) ⌊ cmp ⌋ (s , n) (cons (id , val) xs₁ x)
 appendFresh {xs₁ = []} _ ordered = toDec ordered , _
 appendFresh {xs₁ = cons (id₁ , val₁) xs₁ lower} (lower₁ , snd₁) ordered = toDec ordered , appendFresh lower (ordered << fromDec lower₁)
 
 _[_↦_] : (s : States) → (id : ID) → (v : 𝕍) → States
 [] [ id ↦ v ] = (id , v) ∷# []
-cons (id₁ , v₁) _ p₁ [ id ↦ v ] with id <? id₁ | id₁ <? id
-cons s₁ [] p₁ [ id ↦ v ] | yes p | q = cons (id , v) (s₁ ∷# []) (toDec p , _)
-cons s₁ [] p₁ [ id ↦ v ] | no  p | yes q = cons s₁ ((id , v) ∷# []) (toDec q , _)
-cons s₁ [] p₁ [ id ↦ v ] | no  p | no  q = (id , v) ∷# []
-cons s₁ s p₁ [ id ↦ v ] | yes p | q = cons (id , v) (cons s₁ s p₁) (appendFresh p₁ p)
+cons (id₁ , _) _ _ [ id ↦ _ ] with id <? id₁ | id₁ <? id
+cons s₁ [] _ [ id ↦ v ] | yes p | _ = cons (id , v) (s₁ ∷# []) (toDec p , _)
+cons s₁ [] _ [ id ↦ v ] | no  _ | yes q = cons s₁ ((id , v) ∷# []) (toDec q , _)
+cons s₁ [] _ [ id ↦ v ] | no  _ | no  q = (id , v) ∷# []
+cons s₁ s p₁ [ id ↦ v ] | yes p | _ = cons (id , v) (cons s₁ s p₁) (appendFresh p₁ p)
 cons (id₁ , _ ) (cons (id₂ , v₂) s p₂) p₁ [ id ↦ v ] | no p | no  q = cons (id₁ , v) (cons (id₂ , v₂) s p₂) (appendFresh p₂ (fromDec (proj₁ p₁)))
 cons (id₁ , v₁) (cons (id₂ , v₂) s p₂) p₁ [ id ↦ v ] | no p | yes q
     with (cons (id₂ , v₂) s p₂) [ id ↦ v ]
@@ -61,8 +60,8 @@ cons (id₁ , v₁) (cons (id₂ , v₂) s p₂) p₁ [ id ↦ v ] | no p | yes 
 lookup : States → ID → Maybe 𝕍
 lookup xs id = map proj₂ (findᵇ (id ==_ ∘ proj₁) (toList xs .proj₁))
 
-joinOverwrite : (overWrited overWriter : States) → States
-joinOverwrite overWrited overWriter = foldr (λ x y → uncurry (y [_↦_]) x) overWrited (toList overWriter .proj₁)
+joinOverwrite : (overWritee overWriter : States) → States
+joinOverwrite overWritee overWriter = foldr (λ x y → uncurry (y [_↦_]) x) overWritee (toList overWriter .proj₁)
 
 _⊢_==ₛ_ : (_==ᵥ_ : 𝕍 → 𝕍 → Bool) → States → States → Bool
 _ ⊢ [] ==ₛ [] = true
