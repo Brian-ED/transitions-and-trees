@@ -50,4 +50,4 @@ Theorem 4.13 defines s˝´ and yet re-uses s˝. They are equal, so not a mistake
 
 The book never defines which set theory it assumes.
 
-Table 3.2 table and 4.1 have identical descriptions but different content. Both claim to be transition rules for Aexp but the two "Aexp"s are different.
+Table 3.2 and 4.1 have identical descriptions but different content. Both claim to be transition rules for Aexp but the two "Aexp"s are different.
